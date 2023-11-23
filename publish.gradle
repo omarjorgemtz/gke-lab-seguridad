@@ -1,0 +1,50 @@
+apply plugin: 'maven-publish'
+apply plugin: 'net.researchgate.release'
+apply plugin: 'org.springframework.boot'
+
+tasks.named("bootJar") {
+    manifest {
+		attributes 'Implementation-Title': project.name,
+                   'Implementation-Version': project.version,
+                   'Implementation-Vendor-Id': project.group,
+                   'Implementation-Vendor': 'GNP',
+                   'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    }
+}
+
+tasks.named("jar") {
+	enabled = false
+}
+
+release {
+	tagCommitMessage = 'Versión generada: '
+	newVersionCommitMessage = 'Siguiente versión: '
+	tagTemplate = rootProject.name + '-${version}'
+    git {
+        requireBranch.set('')
+    }
+}
+
+publish {
+    dependsOn assemble
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact bootJar
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username "$nexusUser"
+                password "$nexusPassword"
+            }
+		    url project.version.endsWith('-SNAPSHOT') ? "$nexusSnapUrl" : "$nexusUrl"
+            allowInsecureProtocol = true    
+        }
+    }
+
+}

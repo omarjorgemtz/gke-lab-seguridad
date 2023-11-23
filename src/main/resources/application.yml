@@ -1,0 +1,85 @@
+application:
+  title: GKE/GAE/MSV - Plantilla para microservicios
+  description: |
+    ### Plantilla base para microservicios
+  version: 1.0.0
+
+spring:
+  datasource:
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+    url: jdbc:hsqldb:file:my-db;
+    username: SA
+    password:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.HSQLDialect
+
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      enabled: ${ACTUATOR_ENABLED:false}
+      post:
+        enabled: false
+    health:
+      show-details: always
+      enabled: true
+    info:
+      enabled: true
+    mappings:
+      enabled: ${ACTUATOR_ENABLED:false}
+    restart:
+      enabled: ${ACTUATOR_ENABLED:false}
+    shutdown:
+      enabled: ${ACTUATOR_ENABLED:false}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: ${API_DOC_ENABLED:true}
+  swagger-ui:
+    path: /api-docs.html
+    enabled: ${API_DOC_ENABLED:true}
+    filter: true
+  paths-to-exclude: /error
+  override-with-generic-response: false
+
+logging:
+  level:
+    root: ERROR
+    mx.com.gnp.seguridad: ${LOG_LEVEL:INFO}
+
+gnp:
+  apis-externas:
+    url-entidades: https://dominio.com.mx/entidades-externas
+  messages:
+    language: es
+  clave-aes: "miclaveSecreta321"
+  apikey: jSwCjfvJxwi8YMyNlgYvCIqVVIVBf5qrxJSwhXsN9aiEkvIR
+  usuario: "usuarioEjemplo"
+  password: "Pa22W04D"
+  security:
+    auditing:
+      default: ${application.name:${spring.application.name:SYSTEM}}
+    requests:
+      ignoring:
+        - path: "/management/**"
+        - path: "/api-docs*/**"
+        - path: "/webjars/**"
+        - path: "/api-docs/**"
+        - path: "/swagger-ui*/**"
+      authorize:
+        - path: "/entidades*/**"
+          method: GET
+          access: permitAll
+        - path: "/entidades*/**"
+          access: permitAll()
+      default-access: denyAll

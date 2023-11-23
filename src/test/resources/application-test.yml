@@ -1,0 +1,61 @@
+spring:
+  datasource:
+    url: jdbc:hsqldb:mem:seguridad-issues
+    username: SA
+    password:
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+    hikari:
+      maximum-pool-size: 1
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate.dialect: org.hibernate.dialect.HSQLDialect
+      hibernate.default_schema: PUBLIC
+      hibernate.format_sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: "*"
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    mx.com.gnp.seguridad: DEBUG
+
+gnp:
+  messages:
+    language: es
+  security:
+    auditing:
+      default: TEST
+    test:
+      jwt:
+        iss: sa-firebase-jwt@gnp-aplicacion-test.iam.gserviceaccount.com
+        sub: sa-firebase-jwt@gnp-aplicacion-test.iam.gserviceaccount.com
+        aud: https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit
+        iat: 1665169542
+        exp: 1665171342
+        projectid: gnp-aplicacion-test
+        uid: USUARIO
+        claims:
+          idparticipante: 12345
+          mail: usuario@gnp.com.mx
+          apematerno: AMATERNO
+          givenname: USUARIO
+          apepaterno: APATERNO
+          cuentabloqueada: false
+          tipousuario: empleado
+          roles:
+            - Admin
+            - Supervisor
+            - Ejecutivo
