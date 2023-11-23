@@ -1,0 +1,4 @@
+rootProject.name = 'gke-lab-seguridad'
+gradle.rootProject {
+    it.group = 'mx.com.gnp.seguridad'
+}

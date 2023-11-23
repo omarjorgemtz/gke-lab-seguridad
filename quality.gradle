@@ -1,0 +1,146 @@
+apply plugin: 'jacoco'
+apply plugin: 'org.sonarqube'
+apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: 'checkstyle'
+
+ext {
+	checkstyleExclusions = [
+    	'**/*Application.java',
+		'**/config/**',
+		'**/domain/*.java',
+		'**/model/**',
+    ]
+	jacocoMinCoverageRates = [
+		'instruction': 0,
+		'branch'     : 0,
+		'line'       : 0,
+		'complexity' : 0,
+		'method'     : 0,
+		'class'      : 0
+	]
+	jacocoExclusions = [
+    	'**/*Application.class',
+		'**/config/**',
+		'**/domain/*.class',
+		'**/model/**',
+    ]
+    sonarExclusions = "**/config/*.java, **/*Application.java"
+    sonarCoverageExclusions = "**/*Application.java,**/config/**,**/domain/*.java,**/model/**"
+}
+
+checkstyle {
+    configFile rootProject.file("checkstyle.xml")
+    sourceSets = [project.sourceSets.main]
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = false
+        html.required = true
+        html.destination file("${buildDir}/reports/checkstyle/checkstyle.html")
+    }
+	exclude checkstyleExclusions
+}
+
+tasks.withType(Checkstyle).each { checkstyleTask ->
+    checkstyleTask.doLast {
+        reports.all { report ->
+            def outputFile = report.destination
+            if (outputFile.exists() && outputFile.text.contains("<error ")) {
+                throw new GradleException("There were checkstyle warnings! For more info check $outputFile")
+            }
+        }
+    }
+}
+
+tasks.named("build") { 
+	finalizedBy(jacocoTestReport) 
+}
+
+jacoco {
+    reportsDir = file("${buildDir}/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+        html.destination file("${buildDir}/reports/jacoco")
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: jacocoExclusions
+            )
+        }))
+    }
+    doLast {
+		coverageVerification("${jacoco.reportsDir}/test/jacocoTestReport.xml", jacocoMinCoverageRates)
+	}
+}
+
+coveralls {
+    jacocoReportPath file("${jacoco.reportsDir}/test/jacocoTestReport.xml")
+}
+
+sonarqube {
+	properties {
+        property "sonar.buildbreaker.skip" , "true"
+		property "sonar.exclusions", sonarExclusions
+		property "sonar.coverage.exclusions", sonarCoverageExclusions
+        property "sonar.issue.ignore.multicriteria", "e1"
+        property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S105"
+		property "sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*.java"
+	}
+}
+
+def coverageVerification(jacocoReportPath, minCoverageRates) {
+	def report = file(jacocoReportPath)
+	logger.lifecycle("Checking coverage results: ${report}")
+	def parser = new XmlParser()
+	parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+	parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+	def results = parser.parse(report)
+	def percentage = {
+		if (it != null) {
+			def covered = it.'@covered' as Double
+			def missed = it.'@missed' as Double
+			return ((covered / (covered + missed)) * 100).round(2)
+		}
+		return 100
+	}
+	def counters = results.counter
+	def metrics = [:]
+	metrics << [
+		'instruction': percentage(counters.find { it.'@type'.equals('INSTRUCTION') }),
+		'branch'     : percentage(counters.find { it.'@type'.equals('BRANCH') }),
+		'line'       : percentage(counters.find { it.'@type'.equals('LINE') }),
+		'complexity' : percentage(counters.find { it.'@type'.equals('COMPLEXITY') }),
+		'method'     : percentage(counters.find { it.'@type'.equals('METHOD') }),
+		'class'      : percentage(counters.find { it.'@type'.equals('CLASS') })
+	]
+	def failures = []
+	def successes = []
+	metrics.each {
+		def limit = minCoverageRates[it.key]
+		def coverageRate = "- ${it.key} coverage rate is: ${it.value}%, minimum is ${limit}%"
+		if (it.value < limit) {
+			failures.add(coverageRate)
+		} else {
+			successes.add(coverageRate)
+		}
+	}
+	if (failures) {
+		logger.quiet("------------------ Code Coverage Failed -----------------------")
+		failures.each {
+			logger.quiet(it)
+		}
+		logger.quiet("---------------------------------------------------------------")
+		throw new GradleException("Code coverage failed")
+	} else {
+		logger.quiet("Passed Code Coverage Checks")
+		successes.each {
+        	logger.quiet(it)
+        }
+	}
+}

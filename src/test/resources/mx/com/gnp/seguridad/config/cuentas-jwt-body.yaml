@@ -1,0 +1,19 @@
+iss: sa-firebase-jwt@gnp-aplicacion-test.iam.gserviceaccount.com
+sub: sa-firebase-jwt@gnp-aplicacion-test.iam.gserviceaccount.com
+aud: https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit
+iat: 1665169542
+exp: 1665171342
+projectid: gnp-aplicacion-test
+uid: USUARIO
+claims:
+  idparticipante: 12345
+  mail: usuario@gnp.com.mx
+  apematerno: AMATERNO
+  givenname: USUARIO
+  apepaterno: APATERNO
+  cuentabloqueada: false
+  tipousuario: empleado
+  roles: 
+  - Admin
+  - Supervisor
+  - Ejecutivo
