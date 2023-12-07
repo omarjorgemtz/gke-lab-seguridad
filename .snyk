@@ -1,0 +1,9 @@
+custom_rules:
+  - id: Mala practica ResponseEntity
+    description: No se debe usar ResponseEntity
+    severity: high
+    cwe: []
+    fix_analysis: Los resultados los puedes encontrar en https://www.google.com/
+    rule_code: '"ResponseEntity"'
+    languages:
+      - java
