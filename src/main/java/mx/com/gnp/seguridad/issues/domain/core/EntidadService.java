@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -240,6 +241,51 @@ public class EntidadService implements AgregarEntidadLogic, ModificarEntidadLogi
             log.error("Error: {}", e.getMessage());
         }
         return textoCifradoBase64;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Entidad> getEntidadesById(final String id){
+        Connection connection = null;
+        List<Entidad> entidadById = new ArrayList<>();
+        try {
+            // Cargar el driver de la base de datos HSQLDB
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // Establecer la conexión con la base de datos (en este ejemplo, la base de datos se llama "testdb")
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/test_database", "root", "password");
+
+            // Ejecutar la consulta
+            String consulta = "SELECT * FROM APP_ENTIDAD where ID_ENTIDAD = '" + id + "' ";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(consulta);
+
+            // Procesar los resultados de la consulta
+            while (resultSet.next()) {
+                Entidad entidadByName =  new Entidad();
+                entidadByName.setId(resultSet.getString("ID_ENTIDAD"));
+                entidadByName.setNombre(resultSet.getString("ENTIDAD"));
+                entidadByName.setDescripcion(resultSet.getString("DESCRIPCION"));
+                entidadById.add(entidadByName);
+            }
+            resultSet.close();
+            statement.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Cerrar la conexión
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return entidadById;
     }
 
 }

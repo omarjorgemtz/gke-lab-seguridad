@@ -6,17 +6,14 @@ application:
 
 spring:
   datasource:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-    url: jdbc:hsqldb:file:my-db;
-    username: SA
-    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/test_database
+    username: root
+    password: password
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.HSQLDialect
 
 management:
   endpoints:
