@@ -1,5 +1,10 @@
 package mx.com.gnp.seguridad.issues.application;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -169,9 +174,57 @@ public class EntidadController {
     @Operation(summary = "Consulta un catálogo con restTemplate")
     @ApiResponse(responseCode = "200", description = "Entidades externas")
     @ApiResponse(responseCode = "404", description = "No se encontraron entidades", content = @Content(schema = @Schema(implementation = ErrorEntity.class)))
-    @GetMapping(value = "/query", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/query/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public String getQueryEntidad(final @PathVariable String id) {
         return obtenerLogic.getQueryEntidad(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Operation(summary = "Consulta un catálogo con restTemplate")
+    @ApiResponse(responseCode = "200", description = "Entidades externas")
+    @ApiResponse(responseCode = "404", description = "No se encontraron entidades", content = @Content(schema = @Schema(implementation = ErrorEntity.class)))
+    @GetMapping(value = "/{nombre}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Entidad getEntidadByName(final @PathVariable String nombre) {
+
+        Connection connection = null;
+        Entidad entidadByName = null;
+        try {
+            // Cargar el driver de la base de datos HSQLDB
+            Class.forName("org.hsqldb.jdbc.JDBCDriver");
+
+            // Establecer la conexión con la base de datos (en este ejemplo, la base de datos se llama "testdb")
+            connection = DriverManager.getConnection("jdbc:hsqldb:file:testdb", "SA", "");
+
+            // Ejecutar la consulta
+            String consulta = "SELECT * FROM entidad where nombre = '" + nombre + "' ";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(consulta);
+
+            // Procesar los resultados de la consulta
+            while (resultSet.next()) {
+                entidadByName =  new Entidad();
+                entidadByName.setId(resultSet.getString("id"));
+                entidadByName.setNombre(resultSet.getString("nombre"));
+                entidadByName.setDescripcion(resultSet.getString("descripcion"));
+            }
+            resultSet.close();
+            statement.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Cerrar la conexión
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return entidadByName;
     }
 
     /**
