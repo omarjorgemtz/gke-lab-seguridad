@@ -63,7 +63,7 @@ gnp:
   messages:
     language: es
   clave-aes: "miclaveSecreta321"
-  apikey: jSwCjfvJxwi8YMyNlgYvCIqVVIVBf5qrxJSwhXsN9aiEkvIR
+  apiKey: jSwCjfvJxwi8YMyNlgYvCIqVVIVBf5qrxJSwhXsN9aiEkvIR
   usuario: "usuarioEjemplo"
   password: "Pa22W04D"
   security:
