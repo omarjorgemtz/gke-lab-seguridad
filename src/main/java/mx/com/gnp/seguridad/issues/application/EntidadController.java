@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,29 +186,30 @@ public class EntidadController {
     @Operation(summary = "Consulta un catálogo con restTemplate")
     @ApiResponse(responseCode = "200", description = "Entidades externas")
     @ApiResponse(responseCode = "404", description = "No se encontraron entidades", content = @Content(schema = @Schema(implementation = ErrorEntity.class)))
-    @GetMapping(value = "/{nombre}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Entidad getEntidadByName(final @PathVariable String nombre) {
+    @GetMapping(value = "/sqli/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Entidad> getEntidadByName(final @PathVariable String id) {
 
         Connection connection = null;
-        Entidad entidadByName = null;
+        List<Entidad> entidadById = new ArrayList<>();
         try {
             // Cargar el driver de la base de datos HSQLDB
-            Class.forName("org.hsqldb.jdbc.JDBCDriver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
             // Establecer la conexión con la base de datos (en este ejemplo, la base de datos se llama "testdb")
-            connection = DriverManager.getConnection("jdbc:hsqldb:file:testdb", "SA", "");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/test_database", "root", "password");
 
             // Ejecutar la consulta
-            String consulta = "SELECT * FROM entidad where nombre = '" + nombre + "' ";
+            String consulta = "SELECT * FROM APP_ENTIDAD where ID_ENTIDAD = '" + id + "' ";
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(consulta);
 
             // Procesar los resultados de la consulta
             while (resultSet.next()) {
-                entidadByName =  new Entidad();
-                entidadByName.setId(resultSet.getString("id"));
-                entidadByName.setNombre(resultSet.getString("nombre"));
-                entidadByName.setDescripcion(resultSet.getString("descripcion"));
+                Entidad entidadByName =  new Entidad();
+                entidadByName.setId(resultSet.getString("ID_ENTIDAD"));
+                entidadByName.setNombre(resultSet.getString("ENTIDAD"));
+                entidadByName.setDescripcion(resultSet.getString("DESCRIPCION"));
+                entidadById.add(entidadByName);
             }
             resultSet.close();
             statement.close();
@@ -224,7 +226,7 @@ public class EntidadController {
                 }
             }
         }
-        return entidadByName;
+        return entidadById;
     }
 
     /**
@@ -254,6 +256,17 @@ public class EntidadController {
         entidad.setDescripcion("Nueva descripcion");
         agregarLogic.agregarExterna(entidad);
         return entidad;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Operation(summary = "Consulta un catálogo con restTemplate")
+    @ApiResponse(responseCode = "200", description = "Entidades externas")
+    @ApiResponse(responseCode = "404", description = "No se encontraron entidades", content = @Content(schema = @Schema(implementation = ErrorEntity.class)))
+    @GetMapping(value = "/sqli/service/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Entidad> getEntidadById(final @PathVariable String id) {
+        return obtenerLogic.getEntidadesById(id);
     }
 
 }

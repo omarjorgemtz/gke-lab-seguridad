@@ -42,6 +42,7 @@ ext {
 }
 
 repositories {
+	mavenCentral()
 	maven {
     	name "GNP repository"
         url "http://nexus.gnp.mx/repository/maven-releases"
@@ -76,7 +77,9 @@ dependencies {
 	implementation "mx.com.gnp.boot:gnp-starter-jwt:${gnpStarterCuentasVersion}"
 	implementation "mx.com.gnp.boot:gnp-starter-jwt-cuentas:${gnpStarterCuentasVersion}"
 	runtimeOnly 'org.hsqldb:hsqldb'
-	
+	implementation 'mysql:mysql-connector-java:8.0.33'
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.hsqldb:hsqldb'
 	

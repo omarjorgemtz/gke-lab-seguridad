@@ -38,4 +38,12 @@ public interface ObtenerEntidadLogic {
      */
     String getQueryEntidad(String id);
 
+    /**
+     * Obtiene todas las "Entidad" externas ordenadas por nombre.
+     *
+     * @return Query de {@link Entidad}
+     * @param  id Identificador
+     */
+    List<Entidad> getEntidadesById(String id);
+
 }
