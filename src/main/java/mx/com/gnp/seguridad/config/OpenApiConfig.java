@@ -57,6 +57,10 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT"));
     }
 
+    /**
+     * INFO.
+     * @return
+     */
     private Info getInfo() {
         return new Info()
                 .title(title)
