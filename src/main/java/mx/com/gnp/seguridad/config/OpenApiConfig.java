@@ -59,7 +59,7 @@ public class OpenApiConfig {
 
     /**
      * INFO.
-     * @return
+     * @return info
      */
     private Info getInfo() {
         return new Info()
